@@ -7,7 +7,7 @@
 ;; Description: use god-mode keybindings in evil-mode
 ;; Version: 0.1
 ;; Keywords: evil leader god-mode
-;; Package-Requires: ((diminish "0.44") (evil "1.0.8") (god-mode "2.12.0"))
+;; Package-Requires: ((evil "1.0.8") (god-mode "2.12.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -27,12 +27,23 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
+;; This is an evil-mode state for using god-mode.
 
-;; See README.md.
+;; It provides a command `evil-execute-in-god-state' that switches to
+;; `god-local-mode' for the next command. I bind it to ","
+;;
+;;     (evil-define-key 'normal global-map "," 'evil-execute-in-god-state)
+;;
+;; for an automatically-configured leader key.
+;;
+;; Since `evil-god-state' includes an indicator in the mode-line, you may want
+;; to use `diminish' to keep your mode-line uncluttered, e.g.
+;;
+;;     (add-hook 'evil-god-start-hook (lambda () (diminish 'god-local-mode)))
+;;     (add-hook 'evil-god-stop-hook (lambda () (diminish-undo 'god-local-mode)))
+
 
 ;;; Code:
-
-(require 'diminish)
 (require 'evil)
 (require 'god-mode)
 
@@ -47,13 +58,11 @@
 
 (defun evil-god-start-hook ()
   "Run before entering `evil-god-state'."
-  (diminish 'god-local-mode)
   (god-local-mode 1))
 
 (defun evil-god-stop-hook ()
   "Run before exiting `evil-god-state'."
-  (god-local-mode -1)
-  (diminish-undo 'god-local-mode))
+  (god-local-mode -1))
 
 (defvar evil-execute-in-god-state-buffer nil)
 
@@ -73,8 +82,9 @@
     (setq evil-execute-in-god-state-buffer nil)))
 
 ;;;###autoload
-(evil-define-command evil-execute-in-god-state ()
+(defun evil-execute-in-god-state ()
   "Execute the next command in God state."
+  (interactive)
   (add-hook 'post-command-hook #'evil-stop-execute-in-god-state t)
   (setq evil-execute-in-god-state-buffer (current-buffer))
   (cond
