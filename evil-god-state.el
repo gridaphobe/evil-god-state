@@ -1,12 +1,13 @@
 ;;; evil-god-state.el --- use god-mode keybindings in evil-mode
 
+;; Copyright (C) 2014 by Eric Seidel
 ;; Author: Eric Seidel
 ;; URL: https://github.com/gridaphobe/evil-god-state
+;; Filename: evil-god-state.el
+;; Description: use god-mode keybindings in evil-mode
 ;; Version: 0.1
-;; Keywords: evil
-;; Package-Requires: ((diminish "0.44")
-;;                    (evil "1.0.8")
-;;                    (god-mode "2.12.0"))
+;; Keywords: evil leader god-mode
+;; Package-Requires: ((diminish "0.44") (evil "1.0.8") (god-mode "2.12.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -71,7 +72,7 @@
           (evil-change-to-previous-state))))
     (setq evil-execute-in-god-state-buffer nil)))
 
-;;;##autoload
+;;;###autoload
 (evil-define-command evil-execute-in-god-state ()
   "Execute the next command in God state."
   (add-hook 'post-command-hook #'evil-stop-execute-in-god-state t)
