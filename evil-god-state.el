@@ -66,6 +66,12 @@
 
 (defvar evil-execute-in-god-state-buffer nil)
 
+(defvar evil-god-last-command nil)
+
+(defun evil-god-fix-last-command ()
+  "Change `last-command' to be the command before `evil-execute-in-god-state'."
+  (setq last-command evil-god-last-command))
+
 (defun evil-stop-execute-in-god-state ()
   "Switch back to previous evil state."
   (when (and (not (eq this-command #'evil-execute-in-god-state))
@@ -76,6 +82,7 @@
              (not (eq this-command #'digit-argument))
              (not (eq this-command #'negative-argument))
              (not (minibufferp)))
+    (remove-hook 'pre-command-hook 'evil-god-fix-last-command)
     (remove-hook 'post-command-hook 'evil-stop-execute-in-god-state)
     (when (buffer-live-p evil-execute-in-god-state-buffer)
       (with-current-buffer evil-execute-in-god-state-buffer
@@ -91,8 +98,10 @@
 (defun evil-execute-in-god-state ()
   "Execute the next command in God state."
   (interactive)
+  (add-hook 'pre-command-hook #'evil-god-fix-last-command t)
   (add-hook 'post-command-hook #'evil-stop-execute-in-god-state t)
   (setq evil-execute-in-god-state-buffer (current-buffer))
+  (setq evil-god-last-command last-command)
   (cond
    ((evil-visual-state-p)
     (let ((mrk (mark))
