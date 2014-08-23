@@ -69,6 +69,12 @@
 (defun evil-stop-execute-in-god-state ()
   "Switch back to previous evil state."
   (when (and (not (eq this-command #'evil-execute-in-god-state))
+             (not (eq this-command #'universal-argument))
+             (not (eq this-command #'universal-argument-minus))
+             (not (eq this-command #'universal-argument-more))
+             (not (eq this-command #'universal-argument-other-key))
+             (not (eq this-command #'digit-argument))
+             (not (eq this-command #'negative-argument))
              (not (minibufferp)))
     (remove-hook 'post-command-hook 'evil-stop-execute-in-god-state)
     (when (buffer-live-p evil-execute-in-god-state-buffer)
