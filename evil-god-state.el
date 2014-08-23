@@ -42,6 +42,10 @@
 ;;     (add-hook 'evil-god-start-hook (lambda () (diminish 'god-local-mode)))
 ;;     (add-hook 'evil-god-stop-hook (lambda () (diminish-undo 'god-local-mode)))
 
+;; It's handy to be able to abort a `evil-god-state' command.  The following
+;; will make the <ESC> key unconditionally exit evil-god-state.
+;;     (evil-define-key 'god global-map [escape] 'evil-god-state-bail)
+
 
 ;;; Code:
 (require 'evil)
@@ -113,14 +117,13 @@
     (evil-god-state)))
   (evil-echo "Switched to God state for the next command ..."))
 
-;;; Pressing <esc> will always get you out of Evil-God state.
+;;; Unconditionally exit Evil-God state.
 (defun evil-god-state-bail ()
   "Stop current God command and exit God state."
   (interactive)
   (evil-stop-execute-in-god-state)
   (evil-god-stop-hook)
   (evil-normal-state))
-(evil-define-key 'god global-map [escape] 'evil-god-state-bail)
 
 (provide 'evil-god-state)
 ;;; evil-god-state.el ends here

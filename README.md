@@ -17,5 +17,11 @@ Since `evil-god-state` includes an indicator in the mode-line, you may want to u
 (add-hook 'evil-god-stop-hook (lambda () (diminish-undo 'god-local-mode)))
 ```
 
+It's handy to be able to abort a `evil-god-state' command.  The following will make the <ESC> key unconditionally exit evil-god-state.
+
+```lisp
+(evil-define-key 'god global-map [escape] 'evil-god-state-bail)
+```
+
 [evil-mode]: https://gitorious.org/evil/
 [god-mode]: https://github.com/chrisdone/god-mode
