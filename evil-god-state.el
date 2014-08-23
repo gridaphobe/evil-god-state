@@ -98,5 +98,14 @@
     (evil-god-state)))
   (evil-echo "Switched to God state for the next command ..."))
 
+;;; Pressing <esc> will always get you out of Evil-God state.
+(defun evil-god-state-bail ()
+  "Stop current God command and exit God state."
+  (interactive)
+  (evil-stop-execute-in-god-state)
+  (evil-god-stop-hook)
+  (evil-normal-state))
+(evil-define-key 'god global-map [escape] 'evil-god-state-bail)
+
 (provide 'evil-god-state)
 ;;; evil-god-state.el ends here
