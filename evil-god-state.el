@@ -62,7 +62,28 @@
 
 (defun evil-god-start-hook ()
   "Run before entering `evil-god-state'."
-  (god-local-mode 1))
+  (god-local-mode 1)
+  ;; In order to use god-mode in buffers whose major mode is derived
+  ;; from `special-mode`, we must explicitly bind single character
+  ;; keys to `god-mode-self-insert-command`.  Using god-mode in such
+  ;; buffers is very useful to an Evil user; for example for
+  ;; rescheduling in the Org-mode agenda with C-c C-s.
+
+  ;; HACK: Generate all these chars somehow, rather than typing out
+  ;;       all the single chars, some of which were probably missed.
+  ;;       (spw 2014-10-23)
+  (let ((map god-local-mode-map)
+        (keys '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k"
+                "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v"
+                "w" "x" "y" "z" "A" "B" "C" "D" "E" "F" "G"
+                "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R"
+                "S" "T" "U" "V" "W" "X" "Y" "Z" "0" "1" "2"
+                "3" "4" "5" "6" "7" "8" "9" "0" ";" ":" "'"
+                "@" "~" "#" "[" "]" "{" "}" "-" "_" "+" "="
+                "!" "\"" "£" "$" "%" "^" "&" "*" "(" ")" "`"
+                "/" "\"")))
+    (dolist (key keys)
+      (define-key map (kbd key) 'god-mode-self-insert))))
 
 (defun evil-god-stop-hook ()
   "Run before exiting `evil-god-state'."
