@@ -76,36 +76,60 @@
   "Change `last-command' to be the command before `evil-execute-in-god-state'."
   (setq last-command evil-god-last-command))
 
-(defun evil-stop-execute-in-god-state ()
-  "Switch back to previous evil state."
-  (unless (or (eq this-command #'evil-execute-in-god-state)
-              (eq this-command #'universal-argument)
-              (eq this-command #'universal-argument-minus)
-              (eq this-command #'universal-argument-more)
-              (eq this-command #'universal-argument-other-key)
-              (eq this-command #'digit-argument)
-              (eq this-command #'negative-argument)
-              (minibufferp))
-    (remove-hook 'pre-command-hook 'evil-god-fix-last-command)
-    (remove-hook 'post-command-hook 'evil-stop-execute-in-god-state)
-    (when (buffer-live-p evil-execute-in-god-state-buffer)
-      (with-current-buffer evil-execute-in-god-state-buffer
-        (if (and (eq evil-previous-state 'visual)
-                 (not (use-region-p)))
-            (progn
-              (evil-change-to-previous-state)
-              (evil-exit-visual-state))
-          (evil-change-to-previous-state))))
-    (setq evil-execute-in-god-state-buffer nil)))
+;; (defun evil-stop-execute-in-god-state ()
+;;   "Switch back to previous evil state."
+;;   (unless (or (eq this-command #'evil-execute-in-god-state)
+;;               (eq this-command #'universal-argument)
+;;               (eq this-command #'universal-argument-minus)
+;;               (eq this-command #'universal-argument-more)
+;;               (eq this-command #'universal-argument-other-key)
+;;               (eq this-command #'digit-argument)
+;;               (eq this-command #'negative-argument)
+;;               (minibufferp))
+;;     (remove-hook 'pre-command-hook 'evil-god-fix-last-command)
+;;     (remove-hook 'post-command-hook 'evil-stop-execute-in-god-state)
+;;     (when (buffer-live-p evil-execute-in-god-state-buffer)
+;;       (with-current-buffer evil-execute-in-god-state-buffer
+;;         (if (and (eq evil-previous-state 'visual)
+;;                  (not (use-region-p)))
+;;             (progn
+;;               (evil-change-to-previous-state)
+;;               (evil-exit-visual-state))
+;;           (evil-change-to-previous-state))))
+;;     (setq evil-execute-in-god-state-buffer nil)))
 
 ;;;###autoload
 (defun evil-execute-in-god-state ()
-  "Execute the next command in God state."
+  "Execute the next command in Normal state."
   (interactive)
-  (add-hook 'pre-command-hook #'evil-god-fix-last-command t)
-  (add-hook 'post-command-hook #'evil-stop-execute-in-god-state t)
   (setq evil-execute-in-god-state-buffer (current-buffer))
-  (setq evil-god-last-command last-command)
+  (evil-delay '(not (memq this-command
+                          '(evil-execute-in-god-state
+                            evil-use-register
+                            digit-argument
+                            negative-argument
+                            universal-argument
+                            universal-argument-minus
+                            universal-argument-more
+                            universal-argument-other-key)))
+      `(progn
+         (message "evil-previous-state: %s" ',evil-previous-state)
+         ;; (evil-change-to-previous-state)
+         (when (buffer-live-p evil-execute-in-god-state-buffer)
+           (with-current-buffer evil-execute-in-god-state-buffer
+             ;; (evil-change-to-previous-state)
+             (if (and (eq evil-previous-state 'visual)
+                      (not (use-region-p)))
+                 (progn
+                   (evil-change-to-previous-state)
+                   (evil-exit-visual-state))
+               (evil-change-to-previous-state))
+             ))
+         ;; (evil-change-state ',evil-state)
+         ;(setq evil-move-cursor-back ',evil-move-cursor-back)
+         )
+    'post-command-hook)
+  ;; (setq evil-move-cursor-back nil)
   (cond
    ((evil-visual-state-p)
     (let ((mrk (mark))
@@ -117,13 +141,47 @@
     (evil-god-state)))
   (evil-echo "Switched to God state for the next command ..."))
 
+(defun evil-visual-activate-hook (&optional command)
+  "Enable Visual state if the region is activated."
+  (unless (evil-visual-state-p)
+    (evil-delay nil
+        ;; the activation may only be momentary, so re-check
+        ;; in `post-command-hook' before entering Visual state
+        '(unless (or (evil-visual-state-p)
+                     (evil-insert-state-p)
+                     (evil-emacs-state-p)
+                     (evil-god-state-p))
+           (when (and (region-active-p)
+                      (not deactivate-mark))
+             (evil-visual-state)))
+      'post-command-hook nil t
+      "evil-activate-visual-state")))
+
+;; (defun evil-execute-in-god-state ()
+;;   "Execute the next command in God state."
+;;   (interactive)
+;;   (add-hook 'pre-command-hook #'evil-god-fix-last-command t)
+;;   (add-hook 'post-command-hook #'evil-stop-execute-in-god-state t)
+;;   (setq evil-execute-in-god-state-buffer (current-buffer))
+;;   (setq evil-god-last-command last-command)
+;;   (cond
+;;    ((evil-visual-state-p)
+;;     (let ((mrk (mark))
+;;           (pnt (point)))
+;;       (evil-god-state)
+;;       (set-mark mrk)
+;;       (goto-char pnt)))
+;;    (t
+;;     (evil-god-state)))
+;;   (evil-echo "Switched to God state for the next command ..."))
+
 ;;; Unconditionally exit Evil-God state.
-(defun evil-god-state-bail ()
-  "Stop current God command and exit God state."
-  (interactive)
-  (evil-stop-execute-in-god-state)
-  (evil-god-stop-hook)
-  (evil-normal-state))
+;; (defun evil-god-state-bail ()
+;;   "Stop current God command and exit God state."
+;;   (interactive)
+;;   (evil-stop-execute-in-god-state)
+;;   (evil-god-stop-hook)
+;;   (evil-normal-state))
 
 (provide 'evil-god-state)
 ;;; evil-god-state.el ends here
