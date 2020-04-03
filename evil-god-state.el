@@ -61,7 +61,7 @@
   :intercept-esc nil)
 
 (defun evil-god-start-hook ()
-  "Run before entering `evil-god-state'."
+  "Run after entering `evil-god-state'."
   (god-local-mode 1))
 
 (defun evil-god-stop-hook ()
